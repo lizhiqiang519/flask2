@@ -88,7 +88,7 @@ def download_pdf():
     app.logger.info(f'Received download URL: {download_url}')
 
     try:
-        response = requests.get(download_url, timeout=30)  # 设置超时时间
+        response = requests.get(download_url, timeout=3000)  # 设置超时时间
         if response.status_code == 200:
             local_path = 'tmp/downloaded_file.pdf'
             with open(local_path, 'wb') as f:
