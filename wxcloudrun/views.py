@@ -10,6 +10,11 @@ import os
 import requests
 import logging
 
+from flask import Flask, request, jsonify
+import requests
+from pathlib import Path
+from openai import OpenAI  # 假设这是一个示例类，根据您的实际API客户端进行调整
+
 
 app = Flask(__name__)
 
@@ -101,3 +106,47 @@ def download_pdf():
     except requests.RequestException as e:
         app.logger.error(f'Error downloading PDF: {str(e)}')
         return "Error downloading PDF", 500
+
+
+# 初始化API客户端（根据您的实际情况进行调整）
+client = OpenAI(
+    api_key="Y2xlNTY0a2JidmRqa2ZqazU3dDA6bXNrLUNSN0dGVmU0UHJvUzlialpGZnVjTzJud3FrNU0=",
+    base_url="https://api.example.com/v1",
+)
+
+
+@app.route('/upload-pdf', methods=['POST'])
+def upload_pdf():
+    app.logger.info('1231235656223')
+
+    data = request.get_json()
+    download_url = data.get('downloadUrl')
+
+    if not download_url:
+        return jsonify({'error': 'Missing download URL'}), 400
+
+    # 下载文件的本地保存路径
+    local_path = Path("downloaded_file.pdf")
+
+    try:
+        # 下载文件
+        response = requests.get(download_url)
+        if response.status_code == 200:
+            # 保存下载的文件
+            local_path.write_bytes(response.content)
+
+            # 上传文件到API服务
+            # 注意：这里假设client.files.create接受本地文件路径，根据实际API调整
+            file_object = client.files.create(file=local_path, purpose="file-extract")
+
+            # 假设上传成功后的处理，根据您的需求调整
+            return jsonify(
+                {'message': 'PDF downloaded and uploaded successfully', 'file_object': str(file_object)}), 200
+        else:
+            return jsonify({'error': 'Failed to download the file from URL'}), 500
+    except requests.RequestException as e:
+        return jsonify({'error': f'Error downloading PDF: {str(e)}'}), 500
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
