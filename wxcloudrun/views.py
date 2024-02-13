@@ -5,6 +5,16 @@ from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter
 from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 
+from flask import Flask, request, jsonify
+import os
+import requests
+import logging
+
+
+app = Flask(__name__)
+
+# 配置日志记录
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 def index():
@@ -64,3 +74,30 @@ def get_count():
     """
     counter = Counters.query.filter(Counters.id == 1).first()
     return make_succ_response(0) if counter is None else make_succ_response(counter.count)
+
+
+@app.route('/download-pdf', methods=['POST'])
+def download_pdf():
+    app.logger.info('1231235656223')
+
+    download_url = request.json.get('downloadUrl')
+    if not download_url:
+        app.logger.error('Missing download URL')
+        return "Missing download URL", 400
+
+    app.logger.info(f'Received download URL: {download_url}')
+
+    try:
+        response = requests.get(download_url, timeout=30)  # 设置超时时间
+        if response.status_code == 200:
+            local_path = 'tmp/downloaded_file.pdf'
+            with open(local_path, 'wb') as f:
+                f.write(response.content)
+            app.logger.info(f'PDF downloaded successfully. Local path: {local_path}')
+            return f"PDF downloaded successfully. Local path: {local_path}"
+        else:
+            app.logger.error(f'Failed to download PDF. HTTP status code: {response.status_code}')
+            return "Failed to download PDF", 500
+    except requests.RequestException as e:
+        app.logger.error(f'Error downloading PDF: {str(e)}')
+        return "Error downloading PDF", 500
