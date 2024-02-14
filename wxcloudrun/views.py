@@ -115,7 +115,7 @@ client = OpenAI(
 )
 
 
-@app.route('/upload-pdf', methods=['POST'])
+@app.route('/uploadPdf', methods=['POST'])
 def upload_pdf():
     app.logger.info('1231235656223')
 
