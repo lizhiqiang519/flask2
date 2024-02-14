@@ -15,6 +15,11 @@ import requests
 from pathlib import Path
 from openai import OpenAI  # 假设这是一个示例类，根据您的实际API客户端进行调整
 
+from flask import Flask, request, jsonify
+from tencentcloud.common import credential
+from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+from tencentcloud.tcb.v20180608 import tcb_client, models
+
 
 app = Flask(__name__)
 
@@ -146,6 +151,29 @@ def upload_pdf():
             return jsonify({'error': 'Failed to download the file from URL'}), 500
     except requests.RequestException as e:
         return jsonify({'error': f'Error downloading PDF: {str(e)}'}), 500
+
+@app.route('/api/upload', methods=['POST'])
+def upload_pdf():
+    app.logger.info('1238885523')
+
+    file_id = request.json.get('fileID')
+    try:
+        # 假设你已经设置了环境变量或者在这里直接填写你的SecretId和SecretKey
+        cred = credential.Credential("你的SecretId", "你的SecretKey")
+        client = tcb_client.TcbClient(cred, "你的区域")
+        req = models.DownloadFileRequest()
+        req.FileID = file_id
+        response = client.DownloadFile(req)
+        print(response.FileContent)  # 这里是文件内容
+        # 根据需要处理文件，比如保存到本地
+        file_path = "/path/to/save/" + file_id.split('/')[-1] + ".pdf"
+        with open(file_path, 'wb') as f:
+            f.write(response.FileContent)
+        return jsonify({"message": "文件处理成功", "path": file_path})
+    except TencentCloudSDKException as err:
+        print(err)
+        return jsonify({"error": "处理失败"}), 500
+
 
 
 if __name__ == '__main__':
