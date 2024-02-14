@@ -174,6 +174,32 @@ def upload_pdf():
         print(err)
         return jsonify({"error": "处理失败"}), 500
 
+@app.route('/download', methods=['POST'])
+def download_file():
+    app.logger.info('1238568992231223')
+
+    # 从POST请求的JSON体中获取文件的临时链接
+    file_url = request.json.get('fileUrl')
+    if not file_url:
+        return jsonify({'error': 'Missing file URL'}), 400
+
+    # 提取文件名并定义保存路径
+    file_name = file_url.split('/')[-1]
+    save_path = file_name  # 直接使用文件名作为保存路径，将文件保存在当前目录
+
+    try:
+        # 使用requests下载文件
+        response = requests.get(file_url, stream=True)
+        if response.status_code == 200:
+            with open(save_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            return jsonify({'message': 'File downloaded successfully', 'path': save_path})
+        else:
+            return jsonify({'error': 'Failed to download file'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 if __name__ == '__main__':
