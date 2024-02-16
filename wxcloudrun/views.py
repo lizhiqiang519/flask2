@@ -202,7 +202,7 @@ def download_file():
 
 
 @app.route('/downloadFile', methods=['POST'])
-def download_file():
+def download_file_h():
     # 从请求体获取下载链接
     url = "https://7064-pdf-8g1671jo5043b0ee-1306680641.tcb.qcloud.la/pdf/1707709258291.pdf?sign=085fac18606ee7a956561d760473410f&t=1708064004"
     if not url:
