@@ -86,33 +86,6 @@ def get_count():
     return make_succ_response(0) if counter is None else make_succ_response(counter.count)
 
 
-@app.route('/download-pdf', methods=['POST'])
-def download_pdf():
-    app.logger.info('1231235656223')
-
-    download_url = request.json.get('downloadUrl')
-    if not download_url:
-        app.logger.error('Missing download URL')
-        return "Missing download URL", 400
-
-    app.logger.info(f'Received download URL: {download_url}')
-
-    try:
-        response = requests.get(download_url, timeout=3000)  # 设置超时时间
-        if response.status_code == 200:
-            local_path = 'tmp/downloaded_file.pdf'
-            with open(local_path, 'wb') as f:
-                f.write(response.content)
-            app.logger.info(f'PDF downloaded successfully. Local path: {local_path}')
-            return f"PDF downloaded successfully. Local path: {local_path}"
-        else:
-            app.logger.error(f'Failed to download PDF. HTTP status code: {response.status_code}')
-            return "Failed to download PDF", 500
-    except requests.RequestException as e:
-        app.logger.error(f'Error downloading PDF: {str(e)}')
-        return "Error downloading PDF", 500
-
-
 # 初始化API客户端（根据您的实际情况进行调整）
 client = OpenAI(
     api_key="Y2xlNTY0a2JidmRqa2ZqazU3dDA6bXNrLUNSN0dGVmU0UHJvUzlialpGZnVjTzJud3FrNU0=",
