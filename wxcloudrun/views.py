@@ -94,7 +94,7 @@ client = OpenAI(
 )
 
 
-@app.route('/downloadFile', methods=['POST'])
+@app.route('/api/download', methods=['POST'])
 def download_file_h():
     app.logger.info('download_file_h')
 
@@ -126,5 +126,3 @@ def download_file_h():
     except requests.RequestException as e:
         return jsonify({'error': 'Failed to download the file', 'details': str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=False)
